@@ -348,13 +348,13 @@ public class VendingMachineBtService {
         }
 
         public void run() {
+            Log.d(TAG, "Inside Accept thread");
             BluetoothSocket socket = null;
             // Keep listening until exception occurs or a socket is returned.
             while (mState != STATE_CONNECTED)  {
                 try {
-                    socket = mmServerSocket.accept();
-
                     Log.d(TAG, "Waiting for other device to connect..");
+                    socket = mmServerSocket.accept();
 
                     if (socket != null) {
                         synchronized (VendingMachineBtService.this) {

@@ -168,8 +168,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        checkForBluetoothSupport();
-        checkForBluetoothPermissions();
+        //checkForBluetoothSupport();
+        //checkForBluetoothPermissions();
         //scanDevices();
 
         if (mChatService != null) {
