@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -357,6 +358,8 @@ public class VendingMachineBtService {
                     socket = mmServerSocket.accept();
 
                     if (socket != null) {
+                        Log.d(TAG, "connected to other device");
+
                         synchronized (VendingMachineBtService.this) {
                             switch (mState) {
                                 case STATE_LISTEN:
@@ -456,4 +459,6 @@ public class VendingMachineBtService {
             }
         }
     }
+
+
 }

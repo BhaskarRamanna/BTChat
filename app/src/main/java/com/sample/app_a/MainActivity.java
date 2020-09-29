@@ -42,6 +42,7 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.security.Permission;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -53,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_ENABLE_BT = 00;
     private static final int REQUEST_BT_PERMISSIONS = 01;
     private static final int REQUEST_BT_DISCOVERABLE_MODE = 02;
-
 
     TextView connectionStatus;
     Spinner flavorSel;
@@ -72,10 +72,9 @@ public class MainActivity extends AppCompatActivity {
     public ArrayList <BluetoothDevice>  leDeviceList = new ArrayList<>();
 
     BluetoothDevice targetDevice;
-    String sampleDeviceMacAddress = "00:11:22:33:AA:BB";
+    String sampleDeviceMacAddress = "6B:C6:47:01:3C:D9";
 
     List<BluetoothGattService> gattServicesList; // = new ArrayList();
-
 
     PackageManager pm;
 
@@ -114,6 +113,8 @@ public class MainActivity extends AppCompatActivity {
         // Register for broadcasts when a device is discovered.
 /*        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         registerReceiver(receiver, filter);*/
+
+        connectDevice();
     }
 
     // Create a BroadcastReceiver for ACTION_FOUND.
@@ -354,5 +355,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    private void connectDevice() {
+        BluetoothDevice targetDevice = null;
+        // Get the device MAC address
+        Set<BluetoothDevice> pairedDeviceList = bluetoothAdapter.getBondedDevices();
+        // Get the BluetoothDevice object
+        Iterator it = pairedDeviceList.iterator();
+        while(it.hasNext()){
+            Log.d(TAG, "Device: " + it.next());
+            BluetoothDevice device = (BluetoothDevice)it.next();
+            Log.d(TAG, "Device Name: " + device.getName());
+            if(device.getName().equals("OPPO A5")){
+                targetDevice = device;
+            }
+        }
+        //BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+        // Attempt to connect to the device
+
+        if(targetDevice != null)
+            mChatService.connect(targetDevice);
+    }
 
 }
