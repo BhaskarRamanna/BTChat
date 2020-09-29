@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_marginLeft="20dp"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_marginTop="20dp"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/textview_label_connection_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connection Status:" />
+
+        <TextView
+            android:id="@+id/textview_connection_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+        </TextView>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_weight="2"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:textStyle="bold"
+            android:text="Select choice of Flavor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"></TextView>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"></View>
+
+        <Spinner
+            android:backgroundTint="@color/colorPrimaryDark"
+            android:layout_marginRight="10dp"
+            android:layout_gravity="center_horizontal"
+            android:dropDownSelector="@color/colorAccent"
+            android:entries="@array/spinner_items_flavors"
+            android:id="@+id/spinner_flavor_selection"
+            android:layout_width="match_parent"
+            android:layout_height="40dp" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"></View>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_weight="3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:textStyle="bold"
+            android:text="App-B Selection:"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"></View>
+
+        <EditText
+            android:id="@+id/edittext_remote_app_selection"
+            android:editable="false"
+            android:clickable="false"
+            android:hint="None"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"></EditText>
+
+    </LinearLayout>
+
+    <Button
+        android:layout_marginBottom="20dp"
+        android:id="@+id/button_refresh_app"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="    Refresh     "></Button>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="100dp"></View>
+
+
+</LinearLayout>

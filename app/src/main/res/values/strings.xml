@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">App-A</string>
+    <string name="bluetooth_not_supported">Bluetooth Not Supported!!</string>
+
+    <string-array name="spinner_items_flavors">
+        <item>Chocolate</item>
+        <item>Vanilla</item>
+        <item>Cranberry</item>
+    </string-array>
+
+</resources>
