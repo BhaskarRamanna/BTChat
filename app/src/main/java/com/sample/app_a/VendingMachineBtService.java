@@ -81,7 +81,7 @@ public class VendingMachineBtService {
     }
 
     public synchronized void connect(BluetoothDevice device) {
-        Log.d(TAG, "connect to: " + device);
+        Log.d(TAG, "connecting to: " + device);
 
         // Cancel any thread attempting to make a connection
         if (mState == STATE_CONNECTING) {
@@ -112,23 +112,23 @@ public class VendingMachineBtService {
      */
     public synchronized void connected(BluetoothSocket socket, BluetoothDevice
             device) {
-        Log.d(TAG, "connected, Socket Type:");
+        Log.d(TAG, "connected to device: " + device.getName());
 
         // Cancel the thread that completed the connection
         if (mConnectThread != null) {
-            mConnectThread.cancel();
+            //mConnectThread.cancel();
             mConnectThread = null;
         }
 
         // Cancel any thread currently running a connection
         if (mConnectedThread != null) {
-            mConnectedThread.cancel();
+            //mConnectedThread.cancel();
             mConnectedThread = null;
         }
 
         // Cancel the accept thread because we only want to connect to one device
         if (mSecureAcceptThread != null) {
-            mSecureAcceptThread.cancel();
+            //mSecureAcceptThread.cancel();
             mSecureAcceptThread = null;
         }
 /*        if (mInsecureAcceptThread != null) {
@@ -286,7 +286,7 @@ public class VendingMachineBtService {
                     numBytes = mmInStream.read(mmBuffer);
                     // Send the obtained bytes to the UI activity.
                     Message readMsg = mHandler.obtainMessage(
-                            MessageConstants.MESSAGE_READ, numBytes, -1,
+                            Constants.MESSAGE_READ, numBytes, -1,
                             mmBuffer);
                     readMsg.sendToTarget();
                 } catch (IOException e) {
@@ -300,23 +300,27 @@ public class VendingMachineBtService {
         // Call this from the main activity to send data to the remote device.
         public void write(byte[] bytes) {
             try {
+
+                Log.d(TAG, "Writing message to output stream..");
                 mmOutStream.write(bytes);
+
+                Log.d(TAG, "Message writting to o/p stream successfull!!");
 
                 // Share the sent message with the UI activity.
                 Message writtenMsg = mHandler.obtainMessage(
-                        MessageConstants.MESSAGE_WRITE, -1, -1, mmBuffer);
+                        Constants.MESSAGE_WRITE, -1, -1, bytes);
                 writtenMsg.sendToTarget();
             } catch (IOException e) {
                 Log.e(TAG, "Error occurred when sending data", e);
 
-                // Send a failure message back to the activity.
-                Message writeErrorMsg =
-                        mHandler.obtainMessage(MessageConstants.MESSAGE_TOAST);
-                Bundle bundle = new Bundle();
-                bundle.putString("toast",
-                        "Couldn't send data to the other device");
-                writeErrorMsg.setData(bundle);
-                mHandler.sendMessage(writeErrorMsg);
+//                // Send a failure message back to the activity.
+//                Message writeErrorMsg =
+//                        mHandler.obtainMessage(MessageConstants.MESSAGE_TOAST);
+//                Bundle bundle = new Bundle();
+//                bundle.putString("toast",
+//                        "Couldn't send data to the other device");
+//                writeErrorMsg.setData(bundle);
+//                mHandler.sendMessage(writeErrorMsg);
             }
         }
 
@@ -340,7 +344,7 @@ public class VendingMachineBtService {
             BluetoothServerSocket tmp = null;
             try {
                 // MY_UUID is the app's UUID string, also used by the client code.
-                tmp = bluetoothAdapter.listenUsingRfcommWithServiceRecord(VENDING_MACHINE_BT_SERVICE_NAME,VENDING_MACHINE_BT_SERVICE_UUID);
+                tmp = bluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(VENDING_MACHINE_BT_SERVICE_NAME,VENDING_MACHINE_BT_SERVICE_UUID);
             } catch (IOException e) {
                 Log.e(TAG, "Socket's listen() method failed", e);
             }
@@ -370,11 +374,12 @@ public class VendingMachineBtService {
                                 case STATE_NONE:
                                 case STATE_CONNECTED:
                                     // Either not ready or already connected. Terminate new socket.
-                                    try {
+                                    /*try {
+                                        Log.d(TAG ,"Closing new socket..");
                                         socket.close();
                                     } catch (IOException e) {
                                         Log.e(TAG, "Could not close unwanted socket", e);
-                                    }
+                                    }*/
                                     break;
                             }
                         }
@@ -390,6 +395,7 @@ public class VendingMachineBtService {
         // Closes the connect socket and causes the thread to finish.
         public void cancel() {
             try {
+                Log.d(TAG, "Cancel called closing server socket");
                 mmServerSocket.close();
             } catch (IOException e) {
                 Log.e(TAG, "Could not close the connect socket", e);
@@ -410,7 +416,7 @@ public class VendingMachineBtService {
             try {
                 // Get a BluetoothSocket to connect with the given BluetoothDevice.
                 // MY_UUID is the app's UUID string, also used in the server code.
-                tmp = device.createRfcommSocketToServiceRecord(VENDING_MACHINE_BT_SERVICE_UUID);
+                tmp = device.createInsecureRfcommSocketToServiceRecord(VENDING_MACHINE_BT_SERVICE_UUID);
             } catch (IOException e) {
                 Log.e(TAG, "Socket's create() method failed", e);
             }
@@ -428,6 +434,9 @@ public class VendingMachineBtService {
                 mmSocket.connect();
             } catch (IOException connectException) {
                 // Unable to connect; close the socket and return.
+
+                Log.d(TAG, "Exception in connecting to socket: " + connectException );
+
                 try {
                     mmSocket.close();
                 } catch (IOException closeException) {
@@ -441,13 +450,14 @@ public class VendingMachineBtService {
             // the connection in a separate thread.
             //manageMyConnectedSocket(mmSocket);
 
+            // Start the connected thread
+            connected(mmSocket, mmDevice);
+
             // Reset the ConnectThread because we're done
             synchronized (VendingMachineBtService.this) {
                 mConnectThread = null;
             }
 
-            // Start the connected thread
-            connected(mmSocket, mmDevice);
         }
 
         // Closes the client socket and causes the thread to finish.

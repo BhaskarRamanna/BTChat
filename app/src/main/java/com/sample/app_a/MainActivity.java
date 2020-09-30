@@ -9,22 +9,9 @@ import androidx.core.app.ActivityCompat;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothManager;
-import android.bluetooth.BluetoothProfile;
-import android.bluetooth.BluetoothServerSocket;
-import android.bluetooth.BluetoothSocket;
-import android.bluetooth.le.BluetoothLeScanner;
-import android.bluetooth.le.ScanCallback;
-import android.bluetooth.le.ScanResult;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,13 +26,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
-import java.security.Permission;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class MainActivity extends AppCompatActivity {
@@ -61,20 +43,11 @@ public class MainActivity extends AppCompatActivity {
     Button refreshApp;
     BluetoothAdapter bluetoothAdapter;
 
-    private BluetoothLeScanner bluetoothLeScanner =
-            BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
-    private boolean mScanning;
-    private Handler handler = new Handler();
-
-    // Stops scanning after 10 seconds.
-    private static final long SCAN_PERIOD = 10000;
-
-    public ArrayList <BluetoothDevice>  leDeviceList = new ArrayList<>();
 
     BluetoothDevice targetDevice;
-    String sampleDeviceMacAddress = "C0:EE:FB:F4:32:D3";
+    //String sampleDeviceMacAddress = "5C:17:CF:5C:89:6A";    //One plus Nord
+    String sampleDeviceMacAddress = "9C:6B:72:59:42:E8";      //realme
 
-    List<BluetoothGattService> gattServicesList; // = new ArrayList();
 
     PackageManager pm;
 
@@ -92,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Member object for the chat services
      */
-    private VendingMachineBtService mChatService = null;
+    private VendingMachineBtService vendingMachineBtService = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    // Create a BroadcastReceiver for ACTION_FOUND.
+/*    // Create a BroadcastReceiver for ACTION_FOUND.
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -129,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
                 String deviceHardwareAddress = device.getAddress(); // MAC address
             }
         }
-    };
+    };*/
 
     public void setupViews(){
 
@@ -140,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    void checkForBluetoothPermissions(){
+/*    void checkForBluetoothPermissions(){
 
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M){
             int hasLocPerm = pm.checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION, getPackageName());
@@ -162,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.bluetooth_not_supported, Toast.LENGTH_SHORT).show();
             finish();
         }
-    }
+    }*/
 
 
     @Override
@@ -173,11 +146,11 @@ public class MainActivity extends AppCompatActivity {
         //checkForBluetoothPermissions();
         //scanDevices();
 
-        if (mChatService != null) {
+        if (vendingMachineBtService != null) {
             // Only if the state is STATE_NONE, do we know that we haven't started already
-            if (mChatService.getState() == VendingMachineBtService.STATE_NONE) {
+            if (vendingMachineBtService.getState() == VendingMachineBtService.STATE_NONE) {
                 // Start the Bluetooth chat services
-                mChatService.start();
+                vendingMachineBtService.start();
             }
         }
 
@@ -204,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
         if (!bluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        }else if(mChatService == null) {
+        }else if(vendingMachineBtService == null) {
             setupCommunication();
         }
 
@@ -226,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Initialize the BluetoothChatService to perform bluetooth connections
-        mChatService = new VendingMachineBtService(this, mHandler);
+        vendingMachineBtService = new VendingMachineBtService(this, mHandler);
 
         // Initialize the buffer for outgoing messages
         mOutStringBuffer = new StringBuffer("");
@@ -240,17 +213,24 @@ public class MainActivity extends AppCompatActivity {
      * @param message A string of text to send.
      */
     private void sendMessage(String message) {
+
+        Log.d(TAG, "Sending message..");
+
         // Check that we're actually connected before trying anything
-        if (mChatService.getState() != VendingMachineBtService.STATE_CONNECTED) {
+        if (vendingMachineBtService.getState() != VendingMachineBtService.STATE_CONNECTED) {
             //Toast.makeText(getActivity(), R.string.not_connected, Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Device not connected to send message..");
             return;
         }
 
         // Check that there's actually something to send
         if (message.length() > 0) {
+
+            Log.d(TAG, "Message has contents proceeding to send.. ");
+
             // Get the message bytes and tell the BluetoothChatService to write
             byte[] send = message.getBytes();
-            mChatService.write(send);
+            vendingMachineBtService.write(send);
 
             // Reset out string buffer to zero and clear the edit text field
             mOutStringBuffer.setLength(0);
@@ -283,6 +263,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     break;
                 case Constants.MESSAGE_WRITE:
+                    Log.d(TAG, "Writing message successful, MainActivity");
                     byte[] writeBuf = (byte[]) msg.obj;
                     // construct a string from the buffer
                     String writeMessage = new String(writeBuf);
@@ -290,6 +271,7 @@ public class MainActivity extends AppCompatActivity {
                     //remoteAppsSelection.setText(writeMessage);
                     break;
                 case Constants.MESSAGE_READ:
+                    Log.d(TAG, "Reading message successful, MainActivity");
                     byte[] readBuf = (byte[]) msg.obj;
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
@@ -367,6 +349,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Device: " + device.getAddress());
             Log.d(TAG, "Device Name: " + device.getName());
           if(device.getAddress().equals(sampleDeviceMacAddress)){
+              Log.d(TAG, "connect to " + device.getName());
                 targetDevice = device;
             }
         }
@@ -374,7 +357,7 @@ public class MainActivity extends AppCompatActivity {
         // Attempt to connect to the device
 
         if(targetDevice != null)
-            mChatService.connect(targetDevice);
+            vendingMachineBtService.connect(targetDevice);
     }
 
 }
