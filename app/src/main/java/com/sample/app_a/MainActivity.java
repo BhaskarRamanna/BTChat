@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
     public ArrayList <BluetoothDevice>  leDeviceList = new ArrayList<>();
 
     BluetoothDevice targetDevice;
-    String sampleDeviceMacAddress = "6B:C6:47:01:3C:D9";
+    String sampleDeviceMacAddress = "C0:EE:FB:F4:32:D3";
 
     List<BluetoothGattService> gattServicesList; // = new ArrayList();
 
@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
 /*        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         registerReceiver(receiver, filter);*/
 
-        connectDevice();
+
     }
 
     // Create a BroadcastReceiver for ACTION_FOUND.
@@ -181,6 +181,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+       connectDevice();
     }
 
 /*    void scanDevices(){
@@ -362,10 +363,10 @@ public class MainActivity extends AppCompatActivity {
         // Get the BluetoothDevice object
         Iterator it = pairedDeviceList.iterator();
         while(it.hasNext()){
-            Log.d(TAG, "Device: " + it.next());
             BluetoothDevice device = (BluetoothDevice)it.next();
+            Log.d(TAG, "Device: " + device.getAddress());
             Log.d(TAG, "Device Name: " + device.getName());
-            if(device.getName().equals("OPPO A5")){
+          if(device.getAddress().equals(sampleDeviceMacAddress)){
                 targetDevice = device;
             }
         }
